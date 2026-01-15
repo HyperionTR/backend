@@ -9,7 +9,7 @@ def audit_scoring_service(id_simulacion: int):
     time.sleep(random.uniform(1, 3))
     
     # codificamos una posibilidad del 10%
-    if random.random() < 0.60:
+    if random.random() < 0.10:
         _update_scoring_status("FALLIDO", id_simulacion)
         raise Exception("Error en el servicio de scoring")
     

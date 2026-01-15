@@ -1,4 +1,5 @@
 from fastapi import Body, FastAPI, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 from schema import SimulationData, AmortizationRow
 from services.math_service import calcular_tabla_francesa
 from services.db_service import Session, engine
@@ -10,6 +11,15 @@ from typing import List
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# Forgot the CORS problem...
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*']
+)
 
 @app.get('/')
 def main():
