@@ -1,5 +1,7 @@
-from fastapi import Body, FastAPI, BackgroundTasks
+from fastapi import Body, Request, FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from schema import SimulationData, AmortizationRow
 from services.math_service import calcular_tabla_francesa
 from services.db_service import Session, engine, save_simulation_data
@@ -11,6 +13,8 @@ from typing import List
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+app.mount("/assets", StaticFiles(directory="dist/assets"), name="assets")
+templates = Jinja2Templates(directory='dist')
 
 # Forgot the CORS problem...
 app.add_middleware(
@@ -22,8 +26,12 @@ app.add_middleware(
 )
 
 @app.get('/')
-def main():
-    return {"message": "Hello, World!"}
+def main(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"title":"CreditSim"}
+    )
 
 @app.post('/simulate', response_model=List[AmortizationRow])
 def simulate(  bg_task: BackgroundTasks, data: SimulationData = Body(...) ):
