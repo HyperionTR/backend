@@ -2,7 +2,7 @@ from fastapi import Body, FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from schema import SimulationData, AmortizationRow
 from services.math_service import calcular_tabla_francesa
-from services.db_service import Session, engine
+from services.db_service import Session, engine, save_simulation_data
 from services.scoring_service import audit_scoring_service
 from model import Base, TablasAmortizacion
 from typing import List
@@ -32,17 +32,7 @@ def simulate(  bg_task: BackgroundTasks, data: SimulationData = Body(...) ):
     bg_task_id = 0
     
     # Guardamos datos en la BD
-    with Session() as session, session.begin():
-        datos_simulacion = TablasAmortizacion(
-            monto = data.monto,
-            tasa_anual = data.tasa_anual,
-            plazo_meses = data.plazo_meses,
-            tabla_resultado = tabla
-        )
-        session.add(datos_simulacion)
-        session.flush()
-        
-        bg_task_id = datos_simulacion.id
+    bg_task_id = save_simulation_data(data, tabla)
     
     # Llamamos al servicio de scoring
     bg_task.add_task(audit_scoring_service, bg_task_id)
